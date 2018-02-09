@@ -23,8 +23,8 @@ CONFIG += no_include_pwd
 #OPENSSL_INCLUDE_PATH=c:/deps/openssl-1.0.1g/include
 #OPENSSL_LIB_PATH=c:/deps/openssl-1.0.1g
 
-BOOST_INCLUDE_PATH=/usr/local/opt/boost@1.57/include
-BOOST_LIB_PATH=/usr/local/opt/boost@1.57/lib
+BOOST_INCLUDE_PATH=/usr/local/opt/boost/include
+BOOST_LIB_PATH=/usr/local/opt/boost/lib
 BDB_INCLUDE_PATH=/usr/local/opt/berkeley-db@4/include
 BDB_LIB_PATH=/usr/local/opt/berkeley-db@4/lib
 OPENSSL_INCLUDE_PATH=/usr/local/opt/openssl/include
@@ -334,11 +334,11 @@ isEmpty(BDB_INCLUDE_PATH) {
 }
 
 isEmpty(BOOST_LIB_PATH) {
-    macx:BOOST_LIB_PATH = /usr/local/opt/boost@1.57/lib
+    macx:BOOST_LIB_PATH = /usr/local/opt/boost/lib
 }
 
 isEmpty(BOOST_INCLUDE_PATH) {
-    macx:BOOST_INCLUDE_PATH = /usr/local/opt/boost@1.57/include
+    macx:BOOST_INCLUDE_PATH = /usr/local/opt/boost/include
 }
 
 windows:LIBS += -lws2_32 -lshlwapi -lmswsock
