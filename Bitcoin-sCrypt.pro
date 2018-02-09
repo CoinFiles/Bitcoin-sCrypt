@@ -2,6 +2,8 @@ TEMPLATE = app
 TARGET =
 VERSION = 1.4.0
 INCLUDEPATH += src src/json src/qt
+QT += core gui network
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE BOOST_THREAD_PROVIDES_GENERIC_SHARED_MUTEX_ON_WIN __NO_SYSTEM_INCLUDES
 CONFIG += no_include_pwd
 
@@ -20,6 +22,19 @@ CONFIG += no_include_pwd
 #BDB_LIB_PATH=c:/deps/db-4.8.30.NC/build_unix
 #OPENSSL_INCLUDE_PATH=c:/deps/openssl-1.0.1g/include
 #OPENSSL_LIB_PATH=c:/deps/openssl-1.0.1g
+
+BOOST_INCLUDE_PATH=/usr/local/opt/boost@1.57/include
+BOOST_LIB_PATH=/usr/local/opt/boost@1.57/lib
+BDB_INCLUDE_PATH=/usr/local/opt/berkeley-db@4/include
+BDB_LIB_PATH=/usr/local/opt/berkeley-db@4/lib
+OPENSSL_INCLUDE_PATH=/usr/local/opt/openssl/include
+OPENSSL_LIB_PATH=/usr/local/opt/openssl/lib
+MINIUPNPC_INCLUDE_PATH=/usr/local/opt/miniupnpc/include
+MINIUPNPC_LIB_PATH=/usr/local/opt/miniupnpc/lib
+QRENCODE_INCLUDE_PATH=/usr/local/opt/qrencode/include
+QRENCODE_LIB_PATH=/usr/local/opt/qrencode/lib
+
+
 OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
@@ -39,7 +54,15 @@ contains(RELEASE, 1) {
 
 # qmake "USE_UPNP=-" (not supported)
 contains(USE_UPNP, -) {
-    message(Building without UPNP support)
+	message(Building without UPNP support)
+} else {
+	message(Building with UPNP support)
+	count(USE_UPNP, 0) {
+		USE_UPNP=1
+	}
+	DEFINES += USE_UPNP=$$USE_UPNP STATICLIB
+	INCLUDEPATH += $$MINIUPNPC_INCLUDE_PATH
+	LIBS += $$join(MINIUPNPC_LIB_PATH,,-L,) -lminiupnpc
 }
 
 # use: qmake "USE_QRCODE=1"
@@ -294,7 +317,7 @@ isEmpty(BOOST_THREAD_LIB_SUFFIX) {
 }
 
 isEmpty(BDB_LIB_PATH) {
-    macx:BDB_LIB_PATH = /opt/local/lib/db48
+    macx:BDB_LIB_PATH = /usr/local/opt/berkeley-db@4/lib
 }
 
 isEmpty(BDB_LIB_SUFFIX) {
@@ -302,15 +325,15 @@ isEmpty(BDB_LIB_SUFFIX) {
 }
 
 isEmpty(BDB_INCLUDE_PATH) {
-    macx:BDB_INCLUDE_PATH = /opt/local/include/db48
+    macx:BDB_INCLUDE_PATH = /usr/local/opt/berkeley-db@4/include
 }
 
 isEmpty(BOOST_LIB_PATH) {
-    macx:BOOST_LIB_PATH = /opt/local/lib
+    macx:BOOST_LIB_PATH = /usr/local/opt/boost@1.57/lib
 }
 
 isEmpty(BOOST_INCLUDE_PATH) {
-    macx:BOOST_INCLUDE_PATH = /opt/local/include
+    macx:BOOST_INCLUDE_PATH = /usr/local/opt/boost@1.57/include
 }
 
 windows:LIBS += -lws2_32 -lshlwapi -lmswsock

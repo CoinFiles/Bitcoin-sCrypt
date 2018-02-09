@@ -60,6 +60,7 @@
 #include <QDragEnterEvent>
 #include <QUrl>
 #include <QSplashScreen>
+#include <QMimeData>
 
 #include <iostream>
 
@@ -1077,7 +1078,7 @@ void BitcoinGUI::zapWallet()
   
   progressBarLabel->setText(tr("Wallet loaded..."));
   splashMessage(_("Wallet loaded..."));
-  printf(" zap wallet  load     %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+  printf(" zap wallet  load     %15" PRI64d "ms\n", GetTimeMillis() - nStart);
 
   progressBarLabel->setText(tr("Loading lables..."));
   splashMessage(_("Loaded lables..."));
@@ -1133,8 +1134,10 @@ void BitcoinGUI::splashMessage(const std::string &message)
 
 void BitcoinGUI::backupWallet()
 {
-    QString saveDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
-    QString filename = QFileDialog::getSaveFileName(this, tr("Backup Wallet"), saveDir, tr("Wallet Data (*.dat)"));
+    QString filename = GUIUtil::getSaveFileName(this,
+                                                tr("Backup Wallet"), QString(),
+                                                tr("Wallet Data (*.dat)"), NULL);
+    
     if(!filename.isEmpty()) {
         if(!walletModel->backupWallet(filename)) {
             QMessageBox::warning(this, tr("Backup Failed"), tr("There was an error trying to save the wallet data to the new location."));
