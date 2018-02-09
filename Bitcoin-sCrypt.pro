@@ -39,13 +39,18 @@ OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
 
+# Mac: compile for min macOS: Mountain Lion (10.8, 64-bit only)
+#      From macOS 10.8, libc++ is installed by default
+#
+# TODO:
+# to support 10.6 and 10.7 you need to add libc++ yourself
+# see https://stackoverflow.com/questions/18033255/install-libc-on-mac-10-6-8
+macx:QMAKE_CXXFLAGS += -mmacosx-version-min=10.8 -arch x86_64
+macx:QMAKE_CFLAGS += -mmacosx-version-min=10.8 -arch x86_64
+macx:QMAKE_LFLAGS += -mmacosx-version-min=10.8 -arch x86_64
+
 # use: qmake "RELEASE=1"
 contains(RELEASE, 1) {
-    # Mac: compile for maximum compatibility (10.5, 32-bit)
-    macx:QMAKE_CXXFLAGS += -mmacosx-version-min=10.5 -arch i386 -isysroot /Developer/SDKs/MacOSX10.5.sdk
-    macx:QMAKE_CFLAGS += -mmacosx-version-min=10.5 -arch i386 -isysroot /Developer/SDKs/MacOSX10.5.sdk
-    macx:QMAKE_LFLAGS += -mmacosx-version-min=10.5 -arch i386 -isysroot /Developer/SDKs/MacOSX10.5.sdk
-
     !windows:!macx {
         # Linux: static link
         LIBS += -Wl,-Bstatic
@@ -356,8 +361,10 @@ windows:!contains(MINGW_THREAD_BUGFIX, 0) {
     LIBS += -lrt
 }
 
-macx:HEADERS += src/qt/macdockiconhandler.h
-macx:OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm
+macx:HEADERS += src/qt/macdockiconhandler.h \
+                src/qt/macnotificationhandler.h
+macx:OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm \
+                          src/qt/macnotificationhandler.mm
 macx:LIBS += -framework Foundation -framework ApplicationServices -framework AppKit
 macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0
 macx:ICON = src/qt/res/icons/bitcoin.icns
