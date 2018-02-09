@@ -1,11 +1,43 @@
+#qmake parses this file min 3 times
 TEMPLATE = app
 TARGET =
-VERSION = 1.4.0
+VERSION = 1.6.0
 INCLUDEPATH += src src/json src/qt
 QT += core gui network
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE BOOST_THREAD_PROVIDES_GENERIC_SHARED_MUTEX_ON_WIN __NO_SYSTEM_INCLUDES
-CONFIG += no_include_pwd
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets concurrent
+DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE BOOST_THREAD_PROVIDES_GENERIC_SHARED_MUTEX_ON_WIN __NO_SYSTEM_INCLUDES UNICODE
+CONFIG += no_include_pwd thread c++11 exceptions 
+
+#create Both makefiles and then use "make release" or "make debug"
+CONFIG += debug_and_release
+
+CONFIG(debug, debug|release) {
+   QMAKE_CXXFLAGS += -DDEBUG -DDEBUG_LOCKORDER
+
+    # debug flag for gdb:
+    # macx: clang_64/mkspecs/common/gcc-base.conf defaults
+    windows: {	
+        #hard overwrite of defaults
+        QMAKE_CXXFLAGS_DEBUG = -ggdb -O0
+    	QMAKE_CFLAGS_DEBUG = -ggdb -O0	
+    	QMAKE_LFLAGS_DEBUG = -ggdb -O0
+    } else {
+    	QMAKE_CXXFLAGS_DEBUG += -O0
+    	QMAKE_CFLAGS_DEBUG += -O0
+        QMAKE_LFLAGS_DEBUG += -g -O0
+
+	macx:QMAKE_CXXFLAGS += -arch x86_64
+	macx:QMAKE_CFLAGS += -arch x86_64
+ 	macx:QMAKE_LFLAGS += -arch x86_64
+    }
+} else {
+   # release
+   !windows:!macx {
+        # Linux: static link
+        LIBS += -Wl,-Bstatic
+    }
+}
+
 
 # UNCOMMENT THIS SECTION TO BUILD ON WINDOWS
 # Change paths if needed, these use the Bitcoin-sCrypt/deps.git repository locations
@@ -45,17 +77,15 @@ UI_DIR = build
 # TODO:
 # to support 10.6 and 10.7 you need to add libc++ yourself
 # see https://stackoverflow.com/questions/18033255/install-libc-on-mac-10-6-8
-macx:QMAKE_CXXFLAGS += -mmacosx-version-min=10.8 -arch x86_64
-macx:QMAKE_CFLAGS += -mmacosx-version-min=10.8 -arch x86_64
-macx:QMAKE_LFLAGS += -mmacosx-version-min=10.8 -arch x86_64
+# macx:QMAKE_CXXFLAGS += -mmacosx-version-min=10.8 -arch x86_64
+# macx:QMAKE_CFLAGS += -mmacosx-version-min=10.8 -arch x86_64
+# macx:QMAKE_LFLAGS += -mmacosx-version-min=10.8 -arch x86_64
 
-# use: qmake "RELEASE=1"
-contains(RELEASE, 1) {
-    !windows:!macx {
-        # Linux: static link
-        LIBS += -Wl,-Bstatic
-    }
-}
+# override clang_64/mkspecs/qmake.conf defaults
+#                  
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.8
+#QMAKE_APPLE_DEVICE_ARCHS = x86_64
+
 
 # qmake "USE_UPNP=-" (not supported)
 contains(USE_UPNP, -) {
@@ -364,7 +394,7 @@ windows:!contains(MINGW_THREAD_BUGFIX, 0) {
 macx:HEADERS += src/qt/macdockiconhandler.h \
                 src/qt/macnotificationhandler.h
 macx:OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm \
-                          src/qt/macnotificationhandler.mm
+                          src/qt/macnotificationhandler.mm 
 macx:LIBS += -framework Foundation -framework ApplicationServices -framework AppKit
 macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0
 macx:ICON = src/qt/res/icons/bitcoin.icns
@@ -385,6 +415,6 @@ contains(RELEASE, 1) {
     }
 }
 
-system($$QMAKE_LRELEASE -silent $$_PRO_FILE_)
+#system($$QMAKE_LRELEASE -silent $$_PRO_FILE_)
 
 
