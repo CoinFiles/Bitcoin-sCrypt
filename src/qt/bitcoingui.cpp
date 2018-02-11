@@ -33,7 +33,10 @@
 #include "version.h"
 
 #ifdef Q_OS_MAC
-#include "macdockiconhandler.h"
+    #include "macdockiconhandler.h"
+    #include "macnativetoolbar.h"
+#else
+    #include <QToolBar>
 #endif
 
 #include <QApplication>
@@ -43,7 +46,6 @@
 #include <QIcon>
 #include <QTabWidget>
 #include <QVBoxLayout>
-#include <QToolBar>
 #include <QStatusBar>
 #include <QLabel>
 #include <QLineEdit>
@@ -369,21 +371,43 @@ void BitcoinGUI::createMenuBar()
 
 void BitcoinGUI::createToolBars()
 {
+#ifdef Q_OS_MAC
+    MacNativeToolBar *toolbar = new MacNativeToolBar(this);
+#else
     QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
     toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+#endif
+    
     toolbar->addAction(overviewAction);
+    
+#ifdef Q_OS_MAC
+    toolbar->addFixedSpace(); // add additional space
+#endif
+    
     toolbar->addAction(sendCoinsAction);
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
+    
+#ifdef Q_OS_MAC
+    toolbar->addFixedSpace(); // add additional space
+#endif
+    
     toolbar->addAction(miningAction);
 #ifdef FIRST_CLASS_MESSAGING
     toolbar->addAction(firstClassMessagingAction);
 #endif
 
+#ifdef Q_OS_MAC
+    toolbar->addFlexibleSpace(); // force next item to the right side
+    toolbar->addAction(exportAction);
+    toolbar->showInWindow(this->window()->windowHandle());
+#else
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolbar2->addAction(exportAction);
+#endif
+    
 }
 
 void BitcoinGUI::setClientModel(ClientModel *clientModel)
