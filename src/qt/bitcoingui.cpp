@@ -643,17 +643,7 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
     }
 
     // Set icon state: spinning if catching up, tick otherwise
-    //
-    // Problem: when blocks are generated slowly the time between blocks exceed far beyond 90*60 sec.
-    //          Time difference between now and last block can be big (sometimes up to 12hours).
-    //          consequence: wallet will stay out of sync untill next block is received
-    //                       then it will remain in sync until time difference exceeds 90*60 again
-    //
-    // Question: why is the time difference limit introduced in the check ?
-    //           if the wallet is synced up to the last block, why not indicate that we are synced ?
-    //           Now it will only confuse users.
-    //
-    if(/*secs < 90*60 && */count >= nTotalBlocks)
+    if(count >= nTotalBlocks)
     {
         tooltip = tr("Up to date") + QString(".<br>") + tooltip;
         labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));

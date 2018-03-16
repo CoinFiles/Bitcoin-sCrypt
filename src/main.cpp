@@ -40,7 +40,8 @@ uint256 hashBestChain = 0;
 CBlockIndex* pindexBest = NULL;
 int64 nTimeBestReceived = 0;
 
-CMedianFilter<int> cPeerBlockCounts(5, 0); // Amount of blocks that other nodes claim to have
+CMedianFilter<int> cPeerBlockCounts(5, 0); // Median Amount of blocks that other nodes claim to have
+int64 MaxNumOfBlocksFromConnectedPeers;
 
 map<uint256, CBlock*> mapOrphanBlocks;
 multimap<uint256, CBlock*> mapOrphanBlocksByPrev;
@@ -1140,7 +1141,18 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits)
 // Return maximum amount of blocks that other nodes claim to have
 int GetNumBlocksOfPeers()
 {
-    return std::max(cPeerBlockCounts.median(), Checkpoints::GetTotalBlocksEstimate());
+    return std::max(GetMaxNumOfBlocksFromConnectedPeers(), Checkpoints::GetTotalBlocksEstimate());
+}
+
+int GetMaxNumOfBlocksFromConnectedPeers()
+{
+    // Get sorted block heights from last 5 connected peers (smallest first in list)
+    std::vector<int> vecPeers = cPeerBlockCounts.sorted();
+    
+    if (vecPeers.empty()) return 0;
+    if (vecPeers.size() == 1 && vecPeers[0] == 0) return 0;
+    
+    return vecPeers.back();
 }
 
 bool IsInitialBlockDownload()

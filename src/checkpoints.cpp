@@ -51,11 +51,51 @@ namespace Checkpoints
         if (i == mapCheckpoints.end()) return true;
         return hash == i->second;
     }
-
+    
     int GetTotalBlocksEstimate()
     {
         if (fTestNet) return 0;
-        return mapCheckpoints.rbegin()->first;
+        
+        // 1. Initialization:
+        //    Actual block height cannot be fetched accurately during syncing, unless we could fetch it
+        //    from a tursted and up-to-date Block explorer. So we make an educated guess as follows:
+        //    Bitcoin-Scrypt made a hard fork on 19/02/2018, the very first block on that day is:
+        //      block     : fc65e9325c8e90cf2154a128a92e09bbe2350ae17f7368effec4e9e9c37d6f51
+        //      height    : 496568
+        //      timestamp : 19th Feb 2018 00:01:45 GMT
+        //      Epoch time: 1518998505 sec. since 1970
+        //    Take an average of 180 sec per block and add it to the reference block height as an initial value
+        //
+        static int estimatedNumOfBlocks = 0;
+        static const int forkedHeight = 496568;
+        static const int forkedEpochTime = 1518998505;
+        if (estimatedNumOfBlocks < forkedHeight){
+            int64 now = GetTimeMillis();
+            estimatedNumOfBlocks = forkedHeight + (now/1000 - forkedEpochTime) / 180;
+        }
+        
+        // Check for connected Peers
+        if (vNodes.size() != 0){
+            // 2. Adjust estimation to other Peers max block height
+            int numOfBlocksAverageFromConnectedPeers = GetMaxNumOfBlocksFromConnectedPeers();
+            if (numOfBlocksAverageFromConnectedPeers > forkedHeight){
+                estimatedNumOfBlocks = numOfBlocksAverageFromConnectedPeers;
+            }
+            
+            // 3. pindexBest is the current block during syncing or last db loaded block
+            if (pindexBest != NULL){
+                int nHeight = pindexBest->nHeight;
+                bool topOfBlockchainReached = (pindexBest->pnext == NULL);
+                if (topOfBlockchainReached){
+                    // Last block of the blockchain reached.
+                    estimatedNumOfBlocks = nHeight;
+                } else if (nHeight >= estimatedNumOfBlocks){
+                    // Not yet fully synced, keep estimation heigher then current parsed height
+                    estimatedNumOfBlocks = nHeight + 1;
+                }
+            }
+        }
+        return estimatedNumOfBlocks;
     }
 
     CBlockIndex* GetLastCheckpoint(const std::map<uint256, CBlockIndex*>& mapBlockIndex)
