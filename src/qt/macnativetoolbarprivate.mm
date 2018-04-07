@@ -51,7 +51,7 @@ MacNativeToolbarPrivate::MacNativeToolbarPrivate(QObject *parent):
             this,
             &notificationHandler,
             (__bridge CFStringRef)NSWindowDidBecomeMainNotification,
-            NULL,
+            nullptr,
             CFNotificationSuspensionBehaviorDeliverImmediately
         );
 }

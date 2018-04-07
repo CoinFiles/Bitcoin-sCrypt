@@ -77,14 +77,15 @@ UI_DIR = build
 # TODO:
 # to support 10.6 and 10.7 you need to add libc++ yourself
 # see https://stackoverflow.com/questions/18033255/install-libc-on-mac-10-6-8
+# qt4:
 # macx:QMAKE_CXXFLAGS += -mmacosx-version-min=10.8 -arch x86_64
 # macx:QMAKE_CFLAGS += -mmacosx-version-min=10.8 -arch x86_64
 # macx:QMAKE_LFLAGS += -mmacosx-version-min=10.8 -arch x86_64
 
 # override clang_64/mkspecs/qmake.conf defaults
 #                  
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.8
-#QMAKE_APPLE_DEVICE_ARCHS = x86_64
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.9 #qt5
+#QMAKE_APPLE_DEVICE_ARCHS = x86_64 #qt5
 
 
 # qmake "USE_UPNP=-" (not supported)
@@ -218,10 +219,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/scrypt.h \
     src/qt/miningpage.h \
     src/version.h \
-    src/qt/rpcconsole.h \
-    src/qt/macnativetoolbardelegate_p.h \
-    src/qt/macnativetoolbarprivate_p.h \
-    src/qt/macnativetoolbar.h
+    src/qt/rpcconsole.h
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactiontablemodel.cpp \
@@ -284,10 +282,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/rpcconsole.cpp \
     src/scrypt.c \
     src/qt/miningpage.cpp \
-    src/noui.cpp \
-    src/qt/macnativetoolbardelegate.mm \
-    src/qt/macnativetoolbarprivate.mm \
-    src/qt/macnativetoolbar.mm
+    src/noui.cpp
 
 RESOURCES += \
     src/qt/bitcoin.qrc
@@ -341,6 +336,7 @@ TSQM.output = $$QM_DIR/${QMAKE_FILE_BASE}.qm
 TSQM.commands = $$QMAKE_LRELEASE ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_OUT}
 TSQM.CONFIG = no_link
 QMAKE_EXTRA_COMPILERS += TSQM
+PRE_TARGETDEPS += compiler_TSQM_make_all
 
 # "Other files" to show in Qt Creator
 OTHER_FILES += \
@@ -399,8 +395,17 @@ windows:!contains(MINGW_THREAD_BUGFIX, 0) {
 
 macx:HEADERS += src/qt/macdockiconhandler.h \
                 src/qt/macnotificationhandler.h
+
+greaterThan(QT_MAJOR_VERSION, 4): macx:HEADERS += src/qt/macnativetoolbardelegate_p.h \
+                                                  src/qt/macnativetoolbarprivate_p.h \
+                                                  src/qt/macnativetoolbar.h
 macx:OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm \
                           src/qt/macnotificationhandler.mm 
+
+greaterThan(QT_MAJOR_VERSION, 4): macx:OBJECTIVE_SOURCES += src/qt/macnativetoolbardelegate.mm \
+                                                            src/qt/macnativetoolbarprivate.mm \
+                                                            src/qt/macnativetoolbar.mm
+
 macx:LIBS += -framework Foundation -framework ApplicationServices -framework AppKit
 macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0
 macx:ICON = src/qt/res/icons/bitcoin.icns

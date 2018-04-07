@@ -14,7 +14,16 @@ typedef int pid_t; /* define for windows compatiblity */
 #include <vector>
 #include <string>
 
-#include <boost/thread.hpp>
+#if QT_VERSION < 0x050000
+    #ifndef Q_MOC_RUN
+        // Qt4 bug: MOC parser cannot properly handle the BOOST_JOIN macro, which is included
+        //          here via the thread.hpp for a type_traits "has_binary_operator"
+        #include <boost/thread.hpp>
+    #endif
+#else
+    #include <boost/thread.hpp>
+#endif
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/date_time/gregorian/gregorian_types.hpp>

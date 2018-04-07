@@ -22,7 +22,7 @@ class MacNativeToolBar : public QObject
 {
     Q_OBJECT
 public:
-    explicit MacNativeToolBar(QObject *parent = Q_NULLPTR);
+    explicit MacNativeToolBar(QObject *parent = nullptr);
     ~MacNativeToolBar();
 
     void showInWindow(QWindow *window);
